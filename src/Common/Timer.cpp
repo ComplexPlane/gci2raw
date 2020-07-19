@@ -17,8 +17,6 @@
 #include <sys/time.h>
 #endif
 
-#include <fmt/format.h>
-
 #include "Common/CommonTypes.h"
 #include "Common/StringUtil.h"
 
@@ -130,31 +128,6 @@ u64 Timer::GetTimeElapsed()
   return (GetTimeMs() - m_StartTime);
 }
 
-// Get the formatted time elapsed since the Start()
-std::string Timer::GetTimeElapsedFormatted() const
-{
-  // If we have not started yet, return zero
-  if (m_StartTime == 0)
-    return "00:00:00:000";
-
-  // The number of milliseconds since the start.
-  // Use a different value if the timer is stopped.
-  u64 Milliseconds;
-  if (m_Running)
-    Milliseconds = GetTimeMs() - m_StartTime;
-  else
-    Milliseconds = m_LastTime - m_StartTime;
-  // Seconds
-  u32 Seconds = (u32)(Milliseconds / 1000);
-  // Minutes
-  u32 Minutes = Seconds / 60;
-  // Hours
-  u32 Hours = Minutes / 60;
-
-  return fmt::format("{:02}:{:02}:{:02}:{:03}", Hours, Minutes % 60, Seconds % 60,
-                     Milliseconds % 1000);
-}
-
 // Get current time
 void Timer::IncreaseResolution()
 {
@@ -195,39 +168,6 @@ u64 Timer::GetLocalTimeSinceJan1970()
   tzDiff = sysTime - mktime(gmTime);
 
   return static_cast<u64>(sysTime + tzDiff + tzDST);
-}
-
-// Return the current time formatted as Minutes:Seconds:Milliseconds
-// in the form 00:00:000.
-std::string Timer::GetTimeFormatted()
-{
-  time_t sysTime;
-  time(&sysTime);
-
-  struct tm* gmTime = localtime(&sysTime);
-
-#ifdef _WIN32
-  wchar_t tmp[13];
-  wcsftime(tmp, 6, L"%M:%S", gmTime);
-#else
-  char tmp[13];
-  strftime(tmp, 6, "%M:%S", gmTime);
-#endif
-
-// Now tack on the milliseconds
-#ifdef _WIN32
-  struct timeb tp;
-  (void)::ftime(&tp);
-  return UTF16ToUTF8(tmp) + fmt::format(":{:03}", tp.millitm);
-#elif defined __APPLE__
-  struct timeval t;
-  (void)gettimeofday(&t, nullptr);
-  return fmt::format("{}:{:03}", tmp, t.tv_usec / 1000);
-#else
-  struct timespec t;
-  (void)clock_gettime(CLOCK_MONOTONIC, &t);
-  return fmt::format("{}:{:03}", tmp, t.tv_nsec / 1000000);
-#endif
 }
 
 // Returns a timestamp with decimals for precise time comparisons

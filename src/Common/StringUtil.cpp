@@ -6,26 +6,18 @@
 
 #include <algorithm>
 #include <cstdarg>
-#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
 #include <istream>
 #include <iterator>
-#include <limits.h>
 #include <locale>
-#include <sstream>
 #include <string>
 #include <vector>
 
-#include <fmt/format.h>
-
-#include "Common/CommonFuncs.h"
 #include "Common/CommonPaths.h"
 #include "Common/CommonTypes.h"
-#include "Common/Logging/Log.h"
-#include "Common/Swap.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -45,39 +37,6 @@ static locale_t GetCLocale()
   return c_locale;
 }
 #endif
-
-std::string HexDump(const u8* data, size_t size)
-{
-  constexpr size_t BYTES_PER_LINE = 16;
-
-  std::string out;
-  for (size_t row_start = 0; row_start < size; row_start += BYTES_PER_LINE)
-  {
-    out += fmt::format("{:06x}: ", row_start);
-    for (size_t i = 0; i < BYTES_PER_LINE; ++i)
-    {
-      if (row_start + i < size)
-      {
-        out += fmt::format("{:02x} ", data[row_start + i]);
-      }
-      else
-      {
-        out += "   ";
-      }
-    }
-    out += " ";
-    for (size_t i = 0; i < BYTES_PER_LINE; ++i)
-    {
-      if (row_start + i < size)
-      {
-        char c = static_cast<char>(data[row_start + i]);
-        out += IsPrintableCharacter(c) ? c : '.';
-      }
-    }
-    out += "\n";
-  }
-  return out;
-}
 
 // faster than sscanf
 bool AsciiToHex(const std::string& _szValue, u32& result)
@@ -177,7 +136,7 @@ std::string StringFromFormatV(const char* format, va_list args)
 #endif
   if (vasprintf(&buf, format, args) < 0)
   {
-    ERROR_LOG(COMMON, "Unable to allocate memory for string");
+    fprintf(stderr, "Unable to allocate memory for string");
     buf = nullptr;
   }
 
@@ -247,31 +206,6 @@ bool TryParse(const std::string& str, bool* const output)
     return false;
 
   return true;
-}
-
-std::string ValueToString(u16 value)
-{
-  return fmt::format("0x{:04x}", value);
-}
-
-std::string ValueToString(u32 value)
-{
-  return fmt::format("0x{:08x}", value);
-}
-
-std::string ValueToString(u64 value)
-{
-  return fmt::format("0x{:016x}", value);
-}
-
-std::string ValueToString(float value)
-{
-  return fmt::format("{:#.9g}", value);
-}
-
-std::string ValueToString(double value)
-{
-  return fmt::format("{:#.17g}", value);
 }
 
 std::string ValueToString(int value)
@@ -500,7 +434,7 @@ std::string CodeTo(const char* tocode, const char* fromcode, std::basic_string_v
   iconv_t const conv_desc = iconv_open(tocode, fromcode);
   if ((iconv_t)-1 == conv_desc)
   {
-    ERROR_LOG(COMMON, "Iconv initialization failure [%s]: %s", fromcode, strerror(errno));
+    fprintf(stderr, "Iconv initialization failure [%s]: %s", fromcode, strerror(errno));
   }
   else
   {
@@ -533,7 +467,7 @@ std::string CodeTo(const char* tocode, const char* fromcode, std::basic_string_v
         }
         else
         {
-          ERROR_LOG(COMMON, "iconv failure [%s]: %s", fromcode, strerror(errno));
+          fprintf(stderr, "iconv failure [%s]: %s", fromcode, strerror(errno));
           break;
         }
       }

@@ -30,10 +30,8 @@ public:
   // Returns a timestamp with decimals for precise time comparisons
   static double GetDoubleTime();
 
-  static std::string GetTimeFormatted();
   // Formats a timestamp from GetDoubleTime() into a date and time string
   static std::string GetDateTimeFormatted(double time);
-  std::string GetTimeElapsedFormatted() const;
   u64 GetTimeElapsed();
 
   static u32 GetTimeMs();

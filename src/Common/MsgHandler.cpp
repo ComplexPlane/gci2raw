@@ -11,7 +11,6 @@
 #include <windows.h>
 #else
 #include <cstdio>
-#include <fmt/format.h>
 #endif
 
 #include "Common/Common.h"
@@ -36,7 +35,7 @@ bool DefaultMsgHandler(const char* caption, const char* text, bool yes_no, MsgTy
   return IDYES == MessageBox(0, UTF8ToTStr(text).c_str(), UTF8ToTStr(caption).c_str(),
                              window_style | (yes_no ? MB_YESNO : MB_OK));
 #else
-  fmt::print(stderr, "{}\n", text);
+  fprintf(stderr, "%s\n", text);
 
   // Return no to any question (which will in general crash the emulator)
   return false;

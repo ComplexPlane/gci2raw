@@ -130,11 +130,6 @@ bool TryParseVector(const std::string& str, std::vector<N>* output, const char d
   return true;
 }
 
-std::string ValueToString(u16 value);
-std::string ValueToString(u32 value);
-std::string ValueToString(u64 value);
-std::string ValueToString(float value);
-std::string ValueToString(double value);
 std::string ValueToString(int value);
 std::string ValueToString(s64 value);
 std::string ValueToString(bool value);
